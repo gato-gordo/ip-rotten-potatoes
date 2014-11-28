@@ -8,15 +8,15 @@ class MoviesController < ApplicationController
 
   def index
     list_by = params[:sort]
-    if list_by == 'title'
-       @movies = Movie.order :title
-       @hilite_title = true
-    elsif list_by == 'date'
-       @movies = Movie.order :release_date
-       @hilite_date = true
-    else
-       @movies = Movie.all
-    end
+    @movies = if list_by == 'title'
+                Movie.order :title
+                @hilite_title = true
+              elsif list_by == 'date'
+                Movie.order :release_date
+		@hilite_date = true
+              else
+                Movie.all
+              end
   end
 
   def new
