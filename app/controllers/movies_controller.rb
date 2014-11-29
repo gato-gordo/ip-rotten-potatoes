@@ -7,26 +7,30 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie::ratings
     @list_by = params[:sort]
     @filter_by = params[:ratings]
-    @all_ratings = Movie::ratings
 
-    if @list_by == 'title'
-       @movies = Movie.order :title
-       @filter_by = @all_ratings
-    elsif @list_by == 'date'
-       @movies = Movie.order :release_date
-       @filter_by = @all_ratings
+    if @filter_by.nil?
+      @filter_by = session[:ratings].nil? ? @all_ratings : session[:ratings]
     else
-      unless @filter_by.nil?
-        @filter_by = @filter_by.keys
-        @movies = Movie.where(rating: @filter_by)
-      else 
-        @filter_by = @all_ratings
-        @movies = Movie.all
-      end
+      @filter_by = @filter_by.keys
+      session[:ratings] = @filter_by
+      @list_by = session[:sort] unless session[:sort].nil?
     end
 
+    unless @list_by.nil?
+      session[:sort] = @list_by
+      @filter_by = session[:ratings]
+    end
+
+    if @list_by == 'title'
+       @movies = Movie.where(rating: @filter_by).order :title
+    elsif @list_by == 'date'
+       @movies = Movie.where(rating: @filter_by).order :release_date
+    else
+        @movies = Movie.where(rating: @filter_by)
+    end
   end
 
   def new
