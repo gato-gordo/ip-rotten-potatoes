@@ -8,20 +8,29 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie::ratings
-    @list_by = params[:sort]
-    @filter_by = params[:ratings]
 
-    if @filter_by.nil?
-      @filter_by = session[:ratings].nil? ? @all_ratings : session[:ratings]
-    else
-      @filter_by = @filter_by.keys
-      session[:ratings] = @filter_by
-      @list_by = session[:sort] unless session[:sort].nil?
-    end
-
-    unless @list_by.nil?
+    if session[:ratings].nil?
+      @list_by = ''
       session[:sort] = @list_by
-      @filter_by = session[:ratings] unless session[:ratings].nil?
+      @filter_by = @all_ratings
+      session[:ratings] = Hash[@filter_by.collect { |key| [key, 1] }]
+    else
+      @list_by = params[:sort]
+      @filter_by = params[:ratings]
+      if @list_by.nil? && @filter_by.nil?
+        flash.keep
+        redirect_to movies_path(:ratings => session[:ratings], :sort => session[:sort])
+      elsif @list_by.nil?
+        session[:ratings] = @filter_by
+        flash.keep
+        redirect_to movies_path(:ratings => @filter_by, :sort => session[:sort])
+      elsif @filter_by.nil?
+        session[:sort] = @list_by
+        flash.keep
+        redirect_to movies_path(:ratings => session[:ratings], :sort => @list_by)
+      else
+        @filter_by = @filter_by.keys
+      end
     end
 
     if @list_by == 'title'
