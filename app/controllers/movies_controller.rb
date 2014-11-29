@@ -21,7 +21,7 @@ class MoviesController < ApplicationController
 
     unless @list_by.nil?
       session[:sort] = @list_by
-      @filter_by = session[:ratings]
+      @filter_by = session[:ratings] unless session[:ratings].nil?
     end
 
     if @list_by == 'title'
